@@ -78,9 +78,9 @@ jobs:
       - name: Build, tag, and push image to Amazon ECR
         run: |
           docker build -t test .
-          docker tag test:latest public.ecr.aws/f3q9z4v6/test:latest
+          docker tag test:latest 940482440184.dkr.ecr.us-east-1.amazonaws.com/test:latest
           docker images
-          docker push public.ecr.aws/f3q9z4v6/test:latest
+          docker push 940482440184.dkr.ecr.us-east-1.amazonaws.com/test:latest
           
       - name: Run Trivy Scan on Docker Image
         uses: aquasecurity/trivy-action@master
