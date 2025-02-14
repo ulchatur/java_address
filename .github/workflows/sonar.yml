@@ -80,6 +80,7 @@ jobs:
           docker build -t test .
           docker tag test:latest public.ecr.aws/f3q9z4v6/test:latest
           docker images
+          docker push public.ecr.aws/f3q9z4v6/test:latest
           
       - name: Run Trivy Scan on Docker Image
         uses: aquasecurity/trivy-action@master
@@ -90,8 +91,4 @@ jobs:
          # ignore-unfixed: true
           #exit-code: 0
           vuln-type: 'os,library'
-          scanners: 'vuln'
-      
-      - name: Run Trivy Scan on Docker Image
-        run: |
-          docker push public.ecr.aws/f3q9z4v6/test:latest
+          scanners: 'vuln'    
