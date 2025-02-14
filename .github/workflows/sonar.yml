@@ -77,4 +77,4 @@ jobs:
 
       - name: Build, tag, and push image to Amazon ECR
         run: |
-          docker build -t public.ecr.aws/f3q9z4v6/test/myreg:app_{{ github.run_number }} .
+          docker build -t public.ecr.aws/f3q9z4v6/test:app_{{ github.run_number }} .
