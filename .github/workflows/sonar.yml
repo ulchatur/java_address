@@ -81,7 +81,7 @@ jobs:
           docker tag test:latest public.ecr.aws/f3q9z4v6/test:latest
           docker images
           
-      - name: Run Trivy Scan on Nginx Image
+      - name: Run Trivy Scan on Docker Image
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: "public.ecr.aws/f3q9z4v6/test:latest"
@@ -91,4 +91,7 @@ jobs:
           #exit-code: 0
           vuln-type: 'os,library'
           scanners: 'vuln'
-    
+      
+      - name: Run Trivy Scan on Docker Image
+        run: |
+          docker push public.ecr.aws/f3q9z4v6/test:latest
