@@ -1,4 +1,4 @@
-name: Sonar and Docker
+name: Master Sonar and Docker
 on:
   push:
     branches:
