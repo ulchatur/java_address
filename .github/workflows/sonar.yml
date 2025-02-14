@@ -75,7 +75,7 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Build, tag, and push image to Amazon ECR
+      - name: Build Docker Image for ECR
         run: |
           docker build -t test .
           docker tag test:latest 940482440184.dkr.ecr.us-east-1.amazonaws.com/test:${{ github.run_number }}
