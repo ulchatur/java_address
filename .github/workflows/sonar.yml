@@ -86,7 +86,7 @@ jobs:
         with:
           image-ref: "940482440184.dkr.ecr.us-east-1.amazonaws.com/test:latest"
           format: 'table'
-          severity: 'CRITICAL'
+          severity: 'CRITICAL,HIGH,MEDIUM'
          # ignore-unfixed: true
           exit-code: 1
           vuln-type: 'os,library'
