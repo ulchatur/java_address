@@ -8,4 +8,4 @@
 # this is dockerfile
 
 
-FROM nginx:latest
+FROM nginx:alpine
