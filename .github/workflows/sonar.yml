@@ -1,8 +1,8 @@
 name: Master Sonar and Docker
 on:
-  push:
-    branches:
-      - master
+ # push:
+  #  branches:
+   #   - master
   workflow_dispatch:
 jobs:
   start-ec2:
