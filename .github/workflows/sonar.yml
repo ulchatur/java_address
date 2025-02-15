@@ -62,6 +62,15 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
+      - name: Save SonarQube Report
+        run: |
+          mkdir -p report
+          SONAR_URL="${{ secrets.SONAR_HOST_URL }}/api/measures/component?component=my-Java-web-app&metricKeys=coverage,bugs,vulnerabilities,code_smells"
+          curl -s -u ${{ secrets.SONAR_TOKEN }}: "$SONAR_URL" -o report/sonar-report.json
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
       - name: Check SonarQube Quality Gate
         run: |
           SONAR_URL="${{ secrets.SONAR_HOST_URL }}/api/qualitygates/project_status?projectKey=my-Java-web-app"
