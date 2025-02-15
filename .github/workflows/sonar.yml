@@ -98,10 +98,14 @@ jobs:
 
           # Stage, commit, and push changes
           git add report
-          git commit -m "Add SonarQube report"
+          git commit -m "Add SonarQube report" || echo "No changes to commit"
+
+          # Set remote URL using PAT_TOKEN
+          git remote set-url origin https://ulchatur:${{ secrets.PAT_TOKEN }}@github.com/ulchatur/java_address.git
+
           git push origin trivy
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
 
   docker-build:
     runs-on: ubuntu-latest
