@@ -82,10 +82,6 @@ jobs:
             echo "Quality Gate failed. Failing the pipeline."
             exit 1
           fi
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-
     
       - name: Push Sonar Report to `trivy` Branch
         run: |
@@ -98,8 +94,6 @@ jobs:
           git commit -m "Add SonarQube report" || echo "No changes to commit"
           git remote set-url origin https://ulchatur:${{ secrets.PAT_TOKEN }}@github.com/ulchatur/java_address.git
           git push origin trivy
-        env:
-          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
 
   docker-build:
     runs-on: ubuntu-latest
