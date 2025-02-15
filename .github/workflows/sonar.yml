@@ -93,8 +93,8 @@ jobs:
           git fetch origin trivy
           git checkout trivy
 
-          # Copy the report folder
-          cp -r report .
+          # Ensure report folder exists
+          mkdir -p report
 
           # Stage, commit, and push changes
           git add report
