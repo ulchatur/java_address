@@ -18,10 +18,6 @@ jobs:
           else
             echo "start=false" >> $GITHUB_ENV
           fi
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
           
       - name: Start EC2 Instance
         if: env.start == 'true'
@@ -30,10 +26,6 @@ jobs:
           aws ec2 wait instance-running --instance-ids ${{ secrets.EC2_INSTANCE_ID }}
           echo "Waiting for 45 seconds to ensure ec2 is up"
           sleep 45
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
   build:
     runs-on: ubuntu-latest
     needs: start-ec2
@@ -47,7 +39,7 @@ jobs:
           distribution: 'adopt'
           java-version: '11'
       
-      - name: Build with Maven
+      - name: Maven Build
         run: mvn clean install -DskipTests=true -f pom.xml
       
       - name: SonarQube Scan
@@ -62,7 +54,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
-      - name: Save SonarQube Report
+      - name: Save Sonar scan Report
         run: |
           mkdir -p report
           SONAR_URL="${{ secrets.SONAR_HOST_URL }}/api/measures/component?component=my-Java-web-app&metricKeys=coverage,bugs,vulnerabilities,code_smells"
@@ -94,21 +86,12 @@ jobs:
         run: |
           git config --global user.name "ulchatur"
           git config --global user.email "ullasvardhan@gmail.com"
-
-          # Fetch latest changes from `trivy` branch
           git fetch origin trivy
           git checkout trivy
-
-          # Ensure report folder exists
           mkdir -p report
-
-          # Stage, commit, and push changes
           git add report
           git commit -m "Add SonarQube report" || echo "No changes to commit"
-
-          # Set remote URL using PAT_TOKEN
           git remote set-url origin https://ulchatur:${{ secrets.PAT_TOKEN }}@github.com/ulchatur/java_address.git
-
           git push origin trivy
         env:
           PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
