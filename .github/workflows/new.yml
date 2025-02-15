@@ -28,7 +28,7 @@ jobs:
         run: |
           aws ec2 start-instances --instance-ids ${{ secrets.EC2_INSTANCE_ID }}
           aws ec2 wait instance-running --instance-ids ${{ secrets.EC2_INSTANCE_ID }}
-          echo "Waiting for 30 seconds to ensure ec2 is up"
+          echo "Waiting for 45 seconds to ensure ec2 is up"
           sleep 45
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -85,7 +85,7 @@ jobs:
             echo "Quality Gate failed. Failing the pipeline."
             exit 1
           fi
-          env:
+        env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
