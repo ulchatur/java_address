@@ -1,4 +1,4 @@
-name: New Sonar and Docker
+name: Sonar Scan and Docker Image
 on:
   push:
     branches:
