@@ -83,6 +83,25 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+    
+      - name: Push Sonar Report to `trivy` Branch
+        run: |
+          git config --global user.name "ulchatur"
+          git config --global user.email "ullasvardhan@gmail.com"
+
+          # Fetch latest changes from `trivy` branch
+          git fetch origin trivy
+          git checkout trivy
+
+          # Copy the report folder
+          cp -r report .
+
+          # Stage, commit, and push changes
+          git add report
+          git commit -m "Add SonarQube report"
+          git push origin trivy
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   docker-build:
     runs-on: ubuntu-latest
