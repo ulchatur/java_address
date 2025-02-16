@@ -1,29 +1,206 @@
-# Docker
-# Build a Docker image
-# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
-
 trigger:
-- master
+  branches:
+    include:
+      - master
 
-resources:
-- repo: self
-
-variables:
-  tag: '$(Build.BuildId)'
+pr: none
 
 stages:
-- stage: Build
-  displayName: Build image
-  jobs:
-  - job: Build
-    displayName: Build
-    pool:
-      vmImage: ubuntu-latest
-    steps:
-    - task: Docker@2
-      displayName: Build an image
-      inputs:
-        command: build
-        dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
-        tags: |
-          $(tag)
+  - stage: StartEC2
+    displayName: "Start EC2 Instance"
+    jobs:
+      - job: StartEC2
+        pool:
+          vmImage: "ubuntu-latest"
+        steps:
+          - script: |
+              INSTANCE_ID="i-09a57da7e1c41ed4c"
+              STATE=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[*].Instances[*].State.Name' --output text)
+
+              if [ "$STATE" = "running" ]; then
+                echo "EC2 instance is already running. Skipping wait."
+              else
+                aws ec2 start-instances --instance-ids $INSTANCE_ID
+                aws ec2 wait instance-running --instance-ids $INSTANCE_ID
+                echo "Waiting for 45 seconds to ensure EC2 is up"
+                sleep 45
+              fi
+            displayName: "Start EC2"
+            env:
+              INSTANCE_ID: $(INSTANCE_ID)
+              AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+              AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+              AWS_DEFAULT_REGION: us-east-1
+
+  - stage: Build
+    displayName: "Build & SonarQube"
+    dependsOn: StartEC2
+    jobs:
+      - job: Build
+        pool:
+          vmImage: "ubuntu-latest"
+        steps:
+          - checkout: self
+
+          - task: JavaToolInstaller@0
+            inputs:
+              versionSpec: '11'
+              jdkArchitectureOption: 'x64'
+              jdkSourceOption: 'PreInstalled'
+
+          - script: mvn clean install -DskipTests=true -f pom.xml
+            displayName: "Maven Build"
+
+          - task: SonarQubePrepare@5
+            inputs:
+              SonarQube: 'sonar-azure'
+              scannerMode: 'CLI'
+              configMode: 'manual'
+              cliProjectKey: 'my-Java-web-app'  
+              cliProjectName: 'my-Java-web-app'
+              cliSources: '.'  
+              extraProperties: |
+                sonar.organization=my-org
+                sonar.java.binaries=target/classes
+                sonar.host.url=$(SONAR_HOST_URL)
+                sonar.login=$(SONAR_TOKEN)
+            env:
+               SONAR_HOST_URL: $(SONAR_HOST_URL)
+               SONAR_TOKEN: $(SONAR_TOKEN)
+
+          - task: SonarQubeAnalyze@5
+            displayName: "Run SonarQube Analysis"
+
+          - task: SonarQubePublish@5
+            inputs:
+              pollingTimeoutSec: '300'
+            displayName: "Publish SonarQube Results"
+          
+          - script: |
+              curl -u $(SONAR_TOKEN): $(SONAR_HOST_URL)/api/issues/search?componentKeys=my-Java-web-app > sonar-report.json
+            env:
+               SONAR_HOST_URL: $(SONAR_HOST_URL)
+               SONAR_TOKEN: $(SONAR_TOKEN)
+            displayName: "Generate and Save SonarQube Report"
+
+          - script: |
+              git config --global user.email "ullasvardhan@gmail.com"
+              git config --global user.name "ulchatur"
+              git clone https://ulchatur:$(PAT_TOKEN)@github.com/ulchatur/java_address.git
+              cd java_address
+              git checkout trivy
+              git pull origin trivy --no-rebase
+              cp ../sonar-report.json ADO-report/
+              git add ADO-report/sonar-report.json
+              git commit -m "Adding SonarQube report from ADO"
+              git remote set-url origin https://ulchatur:$(PAT_TOKEN)@github.com/ulchatur/java_address.git
+              git pull origin trivy --no-rebase
+              git push origin trivy
+            displayName: "Commit and Push Sonar Report"
+            condition: succeeded()
+            env:
+              PAT_TOKEN: $(PAT_TOKEN)
+
+          - script: |
+              SONAR_URL="$(SONAR_HOST_URL)/api/qualitygates/project_status?projectKey=my-Java-web-app"
+              STATUS=$(curl -s -u $(SONAR_TOKEN): "$SONAR_URL" | jq -r '.projectStatus.status')
+              echo "SonarQube Quality Gate Status: $STATUS"
+              if [ "$STATUS" != "OK" ]; then
+                echo "Quality Gate failed. Failing the pipeline."
+                exit 1
+              fi
+            displayName: "Check SonarQube Quality Gate"
+            env:
+              SONAR_TOKEN: $(SONAR_TOKEN)
+              SONAR_HOST_URL: $(SONAR_HOST_URL)
+
+  - stage: DockerBuild
+    displayName: "Build & Push Docker Image"
+    dependsOn: Build
+    jobs:
+      - job: DockerBuild
+        pool:
+          vmImage: "ubuntu-latest"
+        steps:
+          - checkout: self
+
+          - script: |
+              aws configure set aws_access_key_id $(AWS_ACCESS_KEY_ID)
+              aws configure set aws_secret_access_key $(AWS_SECRET_ACCESS_KEY)
+              aws configure set region us-east-1
+            env:
+              AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+              AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+            displayName: "Configure AWS CLI"
+
+          - script: |
+              aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 940482440184.dkr.ecr.us-east-1.amazonaws.com
+            displayName: "Login to ECR"
+
+          - script: |
+              docker build -t test .
+              echo Build ID is = $(Build.BuildId)
+              docker tag test:latest 940482440184.dkr.ecr.us-east-1.amazonaws.com/test:app$(Build.BuildId)
+              docker images
+            displayName: "Build Docker Image"
+          
+          - script: |
+              echo "Installing Latest Trivy Version..."
+              curl -sfL https://github.com/aquasecurity/trivy/releases/download/v0.59.1/trivy_0.59.1_Linux-64bit.tar.gz | tar xz -C /usr/local/bin
+            displayName: "Install Trivy"
+
+          - script: |
+              echo "Updating Trivy vulnerability database..."
+              trivy image --download-db-only
+            displayName: "Update Trivy Database"
+            
+          - script: |
+              echo "Running Trivy Scan..."
+              trivy image --format table \
+                --severity CRITICAL,HIGH,MEDIUM \
+                --exit-code 0 \
+                --vuln-type os,library \
+                --scanners vuln,config,secret,license \
+                940482440184.dkr.ecr.us-east-1.amazonaws.com/test:app$(Build.BuildId)
+            condition: succeeded()
+            displayName: "Trivy Scan Result"
+
+          #- script: |
+           #   git config --global user.email "ullasvardhan@gmail.com"
+            #  git config --global user.name "ulchatur"
+             # git clone https://ulchatur:$(PAT_TOKEN)@github.com/ulchatur/java_address.git
+            #  cd java_address
+         #     git checkout trivy
+         #     git pull origin trivy --no-rebase
+          #    cp ../trivy-report.json ADO-report/
+           #   git add ADO-report/trivy-report.json
+            #  git commit -m "Adding Trivy report from ADO"
+           #   git remote set-url origin https://ulchatur:$(PAT_TOKEN)@github.com/ulchatur/java_address.git
+            #  git push origin trivy
+           # displayName: "Commit and Push Trivy Report"
+           # condition: succeeded()
+           # env:
+           #   PAT_TOKEN: $(PAT_TOKEN)
+          
+          - script: |
+              docker push 940482440184.dkr.ecr.us-east-1.amazonaws.com/test:app$(Build.BuildId)
+            displayName: "Push Docker Image"
+
+  - stage: StopEC2
+    displayName: "Stop EC2 Instance"
+    dependsOn: DockerBuild
+    condition: always()
+    jobs:
+      - job: StopEC2
+        pool:
+          vmImage: "ubuntu-latest"
+        steps:
+          - script: |
+              aws ec2 stop-instances --instance-ids $INSTANCE_ID
+              aws ec2 wait instance-stopped --instance-ids $INSTANCE_ID
+            displayName: "Stop EC2"
+            env:
+              INSTANCE_ID: $(INSTANCE_ID)
+              AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+              AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+              AWS_DEFAULT_REGION: us-east-1
