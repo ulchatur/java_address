@@ -8,4 +8,4 @@
 # this is dockerfile
 
 
-FROM tomcat:latest
+FROM nginx:alpine
