@@ -101,8 +101,8 @@ jobs:
           mkdir -p report
           pwd
           ls -al
-          cp -f ../report/sonar-scan.json report/
-          cp -f ../report/sonar-gate.json report/
+          cp -f ../../report/sonar-scan.json report/
+          cp -f ../../report/sonar-gate.json report/
           git add report/
           git commit -m "Add SonarQube report"
           git remote set-url origin https://ulchatur:${{ secrets.PAT_TOKEN }}@github.com/ulchatur/java_address.git
