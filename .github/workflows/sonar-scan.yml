@@ -67,9 +67,6 @@ jobs:
           mkdir -p report
           SONAR_URL="${{ secrets.SONAR_HOST_URL }}/api/measures/component?component=my-Java-web-app&metricKeys=coverage,bugs,vulnerabilities,code_smells"
           curl -s -u ${{ secrets.SONAR_TOKEN }}: "$SONAR_URL" -o report/sonar-report.json
-          pwd 
-          ls -al
-          tree
 
       - name: Check SonarQube Quality Gate
         run: |
@@ -80,9 +77,6 @@ jobs:
           echo "$STATUS" > report/sonar-gate.json
           SONAR_STATUS=$(echo "$STATUS" | jq -r '.projectStatus.status')
           echo "SonarQube Quality Gate Status: $SONAR_STATUS"
-          pwd
-          ls -al
-          tree
 
           if [ "$SONAR_STATUS" != "OK" ]; then
             echo "Quality Gate failed. Failing the pipeline."
@@ -103,6 +97,7 @@ jobs:
           pwd
           ls -al
           git checkout trivy
+          ls -al
           rm -rf report
           mkdir -p report
           pwd
