@@ -126,7 +126,7 @@ jobs:
           format: 'table'
           severity: 'CRITICAL,HIGH,MEDIUM'
          # ignore-unfixed: true
-          exit-code: 0
+          exit-code: 1
           vuln-type: 'os,library'
           scanners: 'vuln'   
 
