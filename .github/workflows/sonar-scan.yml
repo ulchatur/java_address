@@ -107,7 +107,7 @@ jobs:
           mkdir -p report
           pwd
           ls -al
-          cp -r /home/runner/work/java_address/java_address/report/sonar-scan.json report/
+          cp -r /home/runner/work/java_address/java_address/report/sonar-report.json report/
           cp -r /home/runner/work/java_address/java_address/report/sonar-gate.json report/
           git add report/
           git commit -m "Add SonarQube report"
