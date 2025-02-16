@@ -80,6 +80,9 @@ jobs:
           echo "$STATUS" > report/sonar-gate.json
           SONAR_STATUS=$(echo "$STATUS" | jq -r '.projectStatus.status')
           echo "SonarQube Quality Gate Status: $SONAR_STATUS"
+          pwd
+          ls -al
+          tree
 
           if [ "$SONAR_STATUS" != "OK" ]; then
             echo "Quality Gate failed. Failing the pipeline."
@@ -95,6 +98,8 @@ jobs:
           git config --global user.email "ullasvardhan@gmail.com"
           pwd
           ls -al
+          git clone https://ulchatur:${{ secrets.PAT_TOKEN }}@github.com/ulchatur/java_address.git
+          cd java_address
           pwd
           ls -al
           git checkout trivy
