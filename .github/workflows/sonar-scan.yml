@@ -74,7 +74,7 @@ jobs:
           STATUS=$(curl -s -u "${{ secrets.SONAR_TOKEN }}:" "$SONAR_URL")
           echo "SonarQube Response: $STATUS"
           mkdir -p report
-          echo "$STATUS" > report/sonar-report.json
+          echo "$STATUS" > report/sonar-gate.json
           SONAR_STATUS=$(echo "$STATUS" | jq -r '.projectStatus.status')
           echo "SonarQube Quality Gate Status: $SONAR_STATUS"
 
@@ -86,23 +86,19 @@ jobs:
           fi
           echo "EXIT_CODE=$EXIT_CODE" >> $GITHUB_ENV
     
-      - name: Push Sonar Report to `trivy` Branch
+      - name: Push Sonar Report to trivy Branch
         run: |
           git config --global user.name "ulchatur"
           git config --global user.email "ullasvardhan@gmail.com"
-          git fetch origin trivy
           git checkout trivy
+          rm -rf report
           mkdir -p report
-          if [ -f "report/sonar-report.json" ]; then
-            if git diff --quiet report/sonar-report.json; then
-              echo "No changes in sonar-report.json. Skipping commit."
-              exit 0
-            fi
-          fi
-          git pull origin trivy --rebase
-          git add report
-          git commit -m "Add SonarQube report" || echo "No changes to commit"
+          cp -f report/sonar-scan.json report/
+          cp -f report/sonar-gate.json report/
+          git add report/
+          git commit -m "Add SonarQube report"
           git remote set-url origin https://ulchatur:${{ secrets.PAT_TOKEN }}@github.com/ulchatur/java_address.git
+          git pull origin trivy --rebase
           git push origin trivy
 
       - name: Fail Pipeline if Quality Gate Failed
