@@ -93,6 +93,13 @@ jobs:
           git fetch origin trivy
           git checkout trivy
           mkdir -p report
+          if [ -f "report/sonar-report.json" ]; then
+            if git diff --quiet report/sonar-report.json; then
+              echo "No changes in sonar-report.json. Skipping commit."
+              exit 0
+            fi
+          fi
+          git pull origin trivy --rebase
           git add report
           git commit -m "Add SonarQube report" || echo "No changes to commit"
           git remote set-url origin https://ulchatur:${{ secrets.PAT_TOKEN }}@github.com/ulchatur/java_address.git
