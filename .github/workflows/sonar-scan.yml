@@ -90,6 +90,8 @@ jobs:
         run: |
           git config --global user.name "ulchatur"
           git config --global user.email "ullasvardhan@gmail.com"
+          git clone https://ulchatur:$(PAT_TOKEN)@github.com/ulchatur/java_address.git
+          cd java_address
           git checkout trivy
           rm -rf report
           mkdir -p report
