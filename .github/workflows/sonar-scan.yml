@@ -66,7 +66,7 @@ jobs:
         run: |
           mkdir -p report
           SONAR_URL="${{ secrets.SONAR_HOST_URL }}/api/measures/component?component=my-Java-web-app&metricKeys=coverage,bugs,vulnerabilities,code_smells"
-          curl -s -u ${{ secrets.SONAR_TOKEN }}: "$SONAR_URL" -o report/sonar-report.json
+          curl -s -u "${{ secrets.SONAR_TOKEN }}:" "$SONAR_URL" -o report/sonar-report.json
 
       - name: Check SonarQube Quality Gate
         run: |
