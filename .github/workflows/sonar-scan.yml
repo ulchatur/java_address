@@ -67,6 +67,9 @@ jobs:
           mkdir -p report
           SONAR_URL="${{ secrets.SONAR_HOST_URL }}/api/measures/component?component=my-Java-web-app&metricKeys=coverage,bugs,vulnerabilities,code_smells"
           curl -s -u ${{ secrets.SONAR_TOKEN }}: "$SONAR_URL" -o report/sonar-report.json
+          pwd 
+          ls -al
+          tree
 
       - name: Check SonarQube Quality Gate
         run: |
@@ -92,8 +95,6 @@ jobs:
           git config --global user.email "ullasvardhan@gmail.com"
           pwd
           ls -al
-          git clone https://ulchatur:${{ secrets.PAT_TOKEN }}@github.com/ulchatur/java_address.git
-          cd java_address
           pwd
           ls -al
           git checkout trivy
