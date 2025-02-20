@@ -50,6 +50,11 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
 
+      - name: Docker compose install
+        run: |
+          sudo apt-get update
+          sudo apt-get install docker-compose-plugin
+
       - name: Update docker-compose.yml with the correct image tag
         run: |
           sed -i "s|image: 940482440184.dkr.ecr.us-east-1.amazonaws.com/test:latest|image: 940482440184.dkr.ecr.us-east-1.amazonaws.com/test:${{ github.run_number }}|g" docker-compose.yml
