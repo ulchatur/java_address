@@ -52,8 +52,8 @@ jobs:
 
       - name: Docker compose install
         run: |
-          apt update
-          apt install -y docker-compose
+          sudo apt update
+          sudo apt install -y docker-compose
 
       - name: Update docker-compose.yml with the correct image tag
         run: |
