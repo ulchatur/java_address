@@ -1,8 +1,8 @@
 name: Sonar Scan and Docker Image
 on:
-  push:
-    branches:
-      - master
+  #push:
+   # branches:
+    #  - master
   workflow_dispatch:
 jobs:
   start-ec2:
@@ -90,18 +90,11 @@ jobs:
         run: |
           git config --global user.name "ulchatur"
           git config --global user.email "ullasvardhan@gmail.com"
-          pwd
-          ls -al
           git clone https://ulchatur:${{ secrets.PAT_TOKEN }}@github.com/ulchatur/java_address.git
           cd java_address
-          pwd
-          ls -al
           git checkout trivy
-          ls -al
           rm -rf report
           mkdir -p report
-          pwd
-          ls -al
           cp -r /home/runner/work/java_address/java_address/report/sonar-report.json report/
           cp -r /home/runner/work/java_address/java_address/report/sonar-gate.json report/
           git add report/
