@@ -95,12 +95,14 @@ jobs:
           git checkout trivy
           git status
           ls -al
+          git rm -rf report/ || true
           rm -rf report
           mkdir -p report
           cp -r /home/runner/work/java_address/java_address/report/sonar-report.json report/
           cp -r /home/runner/work/java_address/java_address/report/sonar-gate.json report/
-          git add report/
-          git commit -m "Add SonarQube report"
+          git add -A
+          git status
+          git diff --staged --exit-code || git commit -m "Update SonarQube report"
           git remote set-url origin https://ulchatur:${{ secrets.PAT_TOKEN }}@github.com/ulchatur/java_address.git
           git pull origin trivy --rebase
           git push origin trivy
