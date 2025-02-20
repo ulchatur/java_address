@@ -60,7 +60,7 @@ jobs:
           HOST: ${{ secrets.EC2_HOST }}
         run: |
           echo "${{ secrets.SSH_KEY }}" | sed 's/\\n/\n/g' > sonar.pem
-          chmod 777 sonar.pem
+          chmod 600 sonar.pem
           
           ssh -o StrictHostKeyChecking=no -i sonar.pem ec2-user@$HOST << 'EOF'
             echo "Pulling latest code..."
