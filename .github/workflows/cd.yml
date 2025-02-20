@@ -59,6 +59,8 @@ jobs:
           echo "Ensuring Docker & Docker Compose are installed..."
           sudo apt update -y
           sudo apt install -y docker-compose
+          echo "Logging into Amazon ECR..."
+          aws ecr get-login-password --region us-east-1 | sudo docker login --username AWS --password-stdin 940482440184.dkr.ecr.us-east-1.amazonaws.com
           echo "Stopping and removing old containers..."
           sudo docker-compose down
           echo "Deploying new containers..."
