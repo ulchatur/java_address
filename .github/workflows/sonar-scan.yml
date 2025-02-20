@@ -1,8 +1,8 @@
 name: Sonar Scan and Docker Image
 on:
-  #push:
-   # branches:
-    #  - master
+  push:
+    branches:
+      - master
   workflow_dispatch:
 jobs:
   start-ec2:
@@ -93,6 +93,8 @@ jobs:
           git clone https://ulchatur:${{ secrets.PAT_TOKEN }}@github.com/ulchatur/java_address.git
           cd java_address
           git checkout trivy
+          git status
+          ls -al
           rm -rf report
           mkdir -p report
           cp -r /home/runner/work/java_address/java_address/report/sonar-report.json report/
