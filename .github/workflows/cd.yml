@@ -37,7 +37,7 @@ jobs:
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
 
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ci-runner
     needs: start-ec2
     steps:
       - name: Checkout Repository
@@ -55,36 +55,18 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Deploy on EC2 via SSH
-        env:
-          SSH_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
-          HOST: ${{ secrets.EC2_HOST }}
         run: |
-          echo "${{ secrets.SSH_KEY }}" | sed 's/\\n/\n/g' > sonar.pem
-          chmod 600 sonar.pem
-          
-          ssh -o StrictHostKeyChecking=no -i sonar.pem ec2-user@$HOST << 'EOF'
-            echo "Pulling latest code..."
-            cd /home/ec2-user  # Change to the correct directory of your project
-            
-            git pull origin master
-            
-            echo "Ensuring Docker & Docker Compose are installed..."
-            sudo yum update -y
-            sudo yum install -y docker
-            sudo systemctl start docker
-            sudo systemctl enable docker
-            sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-            sudo chmod +x /usr/local/bin/docker-compose
-            
-            echo "Stopping and removing old containers..."
-            docker-compose down
-            
-            echo "Deploying new containers..."
-            docker-compose up -d
-            
-            echo "Deployment completed!"
-          EOF         
-          rm -f sonar.pem
+          echo "Ensuring Docker & Docker Compose are installed..."
+          sudo yum update -y
+          sudo yum install -y docker
+          sudo systemctl start docker
+          sudo systemctl enable docker
+          sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose  
+          echo "Stopping and removing old containers..."
+          docker-compose down
+          echo "Deploying new containers..."
+          docker-compose up -d
 
 #  stop-ec2:
   #  runs-on: ubuntu-latest
