@@ -1,4 +1,4 @@
-name: Sonar Scan and Docker Image
+name: Continuous Integration
 on:
  # push:
  #   branches:
