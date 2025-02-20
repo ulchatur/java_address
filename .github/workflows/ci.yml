@@ -67,6 +67,16 @@ jobs:
           mkdir -p report
           SONAR_URL="${{ secrets.SONAR_HOST_URL }}/api/measures/component?component=my-Java-web-app&metricKeys=coverage,bugs,vulnerabilities,code_smells"
           curl -s -u "${{ secrets.SONAR_TOKEN }}" "$SONAR_URL" -o report/sonar-report.json
+
+      - name: Check SonarQube Quality Gate
+        run: |
+          SONAR_URL="${{ secrets.SONAR_HOST_URL }}/api/qualitygates/project_status?projectKey=my-Java-web-app"
+          STATUS=$(curl -s -u "${{ secrets.SONAR_TOKEN }}:" "$SONAR_URL")
+          echo "SonarQube Response: $STATUS"
+          mkdir -p report
+          echo "$STATUS" > report/sonar-gate.json
+          SONAR_STATUS=$(echo "$STATUS" | jq -r '.projectStatus.status')
+          echo "SonarQube Quality Gate Status: $SONAR_STATUS"
  
       - name: Push Sonar Report to trivy Branch
         run: |
@@ -81,17 +91,13 @@ jobs:
           rm -rf report
           mkdir -p report
           cp -r /home/runner/work/java_address/java_address/report/sonar-report.json report/
-       #   cp -r /home/runner/work/java_address/java_address/report/sonar-gate.json report/
+          cp -r /home/runner/work/java_address/java_address/report/sonar-gate.json report/
           git add -A
           git status
           git diff --staged --exit-code || git commit -m "Update SonarQube report"
           git remote set-url origin https://ulchatur:${{ secrets.PAT_TOKEN }}@github.com/ulchatur/java_address.git
           git pull origin trivy --rebase
           git push origin trivy
-
-#      - name: Fail Pipeline if Quality Gate Failed
- #       if: env.EXIT_CODE == '1'
-#        run: exit 1
 
   docker-build:
     runs-on: ubuntu-latest
