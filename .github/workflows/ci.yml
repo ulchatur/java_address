@@ -84,8 +84,7 @@ jobs:
          # else
           #  EXIT_CODE=0
          # fi
-        #  echo "EXIT_CODE=$EXIT_CODE" >> $GITHUB_ENV
-    
+        #  echo "EXIT_CODE=$EXIT_CODE" >> $GITHUB_ENV  
       - name: Push Sonar Report to trivy Branch
         run: |
           git config --global user.name "ulchatur"
