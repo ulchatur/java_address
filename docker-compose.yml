@@ -1,9 +1,8 @@
 version: "3.8"
 
 services:
-  nginx:
-    image: 940482440184.dkr.ecr.us-east-1.amazonaws.com/test:latest  # This will be updated dynamically in the workflow
-    container_name: nginx_container
+  tomcat:
+    image: 940482440184.dkr.ecr.us-east-1.amazonaws.com/test:latest
     restart: always
     ports:
       - "8000:80"
