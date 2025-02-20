@@ -1,6 +1,6 @@
 name: Sonar Scan and Docker Image
 on:
-#  push:
+ # push:
  #   branches:
   #    - master
   workflow_dispatch:
@@ -129,14 +129,13 @@ jobs:
 
       - name: Build Docker Image for ECR
         run: |
-          docker build -t test .
-          docker tag test:latest 940482440184.dkr.ecr.us-east-1.amazonaws.com/test:${{ github.run_number }}
+          docker build -t 940482440184.dkr.ecr.us-east-1.amazonaws.com/test:latest .
           docker images
           
       - name: Run Trivy Scan on Docker Image
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: "940482440184.dkr.ecr.us-east-1.amazonaws.com/test:${{ github.run_number }}"
+          image-ref: "940482440184.dkr.ecr.us-east-1.amazonaws.com/test:latest"
           format: 'table'
           severity: 'CRITICAL,HIGH,MEDIUM'
          # ignore-unfixed: true
@@ -146,7 +145,7 @@ jobs:
 
       - name: Push the Docker Image
         run: |
-          docker push 940482440184.dkr.ecr.us-east-1.amazonaws.com/test:${{ github.run_number }}
+          docker push 940482440184.dkr.ecr.us-east-1.amazonaws.com/test:latest
 
   stop-ec2:
     runs-on: ubuntu-latest
