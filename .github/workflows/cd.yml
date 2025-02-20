@@ -54,14 +54,37 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Docker compose install
+      - name: Deploy on EC2 via SSH
+        env:
+          SSH_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          HOST: ${{ secrets.EC2_HOST }}
         run: |
-          sudo apt update
-          sudo apt install -y docker-compose
-      
-      - name: Deploy Using Docker Compose
-        run: |
-          docker-compose -f ./docker-compose.yml up -d
+          echo "$SSH_KEY" > private_key.pem
+          chmod 600 private_key.pem
+          
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ec2-user@$HOST << 'EOF'
+            echo "Pulling latest code..."
+            cd /home/ec2-user  # Change to the correct directory of your project
+            
+            git pull origin master
+            
+            echo "Ensuring Docker & Docker Compose are installed..."
+            sudo yum update -y
+            sudo yum install -y docker
+            sudo systemctl start docker
+            sudo systemctl enable docker
+            sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+            sudo chmod +x /usr/local/bin/docker-compose
+            
+            echo "Stopping and removing old containers..."
+            docker-compose down
+            
+            echo "Deploying new containers..."
+            docker-compose up -d
+            
+            echo "Deployment completed!"
+          EOF         
+          rm -f private_key.pem
 
 #  stop-ec2:
   #  runs-on: ubuntu-latest
