@@ -7,4 +7,17 @@
 #EXPOSE 8080
 # this is dockerfile
 
-FROM nginx:alpine
+# FROM nginx:alpine
+
+
+# Use the official Tomcat image
+FROM tomcat:latest
+
+# Expose port 8000
+EXPOSE 8000
+
+# Change Tomcat to listen on port 8000 instead of 8080
+RUN sed -i 's/port="8080"/port="8000"/g' /usr/local/tomcat/conf/server.xml
+
+# Start Tomcat when the container runs
+CMD ["catalina.sh", "run"]
