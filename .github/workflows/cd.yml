@@ -59,10 +59,10 @@ jobs:
           SSH_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
           HOST: ${{ secrets.EC2_HOST }}
         run: |
-          echo "$SSH_KEY" > private_key.pem
-          chmod 600 private_key.pem
+          echo "${{ secrets.SSH_KEY }}" | sed 's/\\n/\n/g' > sonar.pem
+          chmod 777 sonar.pem
           
-          ssh -o StrictHostKeyChecking=no -i private_key.pem ec2-user@$HOST << 'EOF'
+          ssh -o StrictHostKeyChecking=no -i sonar.pem ec2-user@$HOST << 'EOF'
             echo "Pulling latest code..."
             cd /home/ec2-user  # Change to the correct directory of your project
             
@@ -84,7 +84,7 @@ jobs:
             
             echo "Deployment completed!"
           EOF         
-          rm -f private_key.pem
+          rm -f sonar.pem
 
 #  stop-ec2:
   #  runs-on: ubuntu-latest
