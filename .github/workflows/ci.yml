@@ -67,24 +67,7 @@ jobs:
           mkdir -p report
           SONAR_URL="${{ secrets.SONAR_HOST_URL }}/api/measures/component?component=my-Java-web-app&metricKeys=coverage,bugs,vulnerabilities,code_smells"
           curl -s -u "${{ secrets.SONAR_TOKEN }}" "$SONAR_URL" -o report/sonar-report.json
-
-     # - name: Check SonarQube Quality Gate
-      #  run: |
-       #   SONAR_URL="${{ secrets.SONAR_HOST_URL }}/api/qualitygates/project_status?projectKey=my-Java-web-app"
-       #   STATUS=$(curl -s -u "${{ secrets.SONAR_TOKEN }}:" "$SONAR_URL")
-        #  echo "SonarQube Response: $STATUS"
-         # mkdir -p report
-         # echo "$STATUS" > report/sonar-gate.json
-         # SONAR_STATUS=$(echo "$STATUS" | jq -r '.projectStatus.status')
-         # echo "SonarQube Quality Gate Status: $SONAR_STATUS"
-
-        #  if [ "$SONAR_STATUS" != "OK" ]; then
-         #   echo "Quality Gate failed. Failing the pipeline."
-          #  EXIT_CODE=1
-         # else
-          #  EXIT_CODE=0
-         # fi
-        #  echo "EXIT_CODE=$EXIT_CODE" >> $GITHUB_ENV  
+ 
       - name: Push Sonar Report to trivy Branch
         run: |
           git config --global user.name "ulchatur"
