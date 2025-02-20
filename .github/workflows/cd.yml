@@ -52,8 +52,13 @@ jobs:
 
       - name: Docker compose install
         run: |
-          sudo apt-get update
-          sudo apt-get install docker-compose-plugin
+            sudo yum update -y
+            sudo yum install -y docker
+            sudo service docker start
+            sudo usermod -aG docker ec2-user
+            sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+            sudo chmod +x /usr/local/bin/docker-compose
+            export PATH=$PATH:/usr/local/bin
 
       - name: Update docker-compose.yml with the correct image tag
         run: |
