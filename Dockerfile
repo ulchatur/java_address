@@ -7,12 +7,4 @@
 #EXPOSE 8080
 # this is dockerfile
 
-
-# Use the official Nginx base image
-FROM nginx:latest
-
-# Expose port 8000
-EXPOSE 8000
-
-# Start Nginx
-CMD ["nginx", "-g", "daemon off;"]
+FROM nginx:alpine
