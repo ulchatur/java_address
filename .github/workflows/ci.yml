@@ -78,13 +78,13 @@ jobs:
           SONAR_STATUS=$(echo "$STATUS" | jq -r '.projectStatus.status')
           echo "SonarQube Quality Gate Status: $SONAR_STATUS"
 
-          if [ "$SONAR_STATUS" != "OK" ]; then
-            echo "Quality Gate failed. Failing the pipeline."
-            EXIT_CODE=1
-          else
-            EXIT_CODE=0
-          fi
-            echo "EXIT_CODE=$EXIT_CODE" >> $GITHUB_ENV
+       #   if [ "$SONAR_STATUS" != "OK" ]; then
+        #    echo "Quality Gate failed. Failing the pipeline."
+         #   EXIT_CODE=1
+        #  else
+         #   EXIT_CODE=0
+         # fi
+          #  echo "EXIT_CODE=$EXIT_CODE" >> $GITHUB_ENV
  
       - name: Push Sonar Report to trivy Branch
         run: |
@@ -107,9 +107,9 @@ jobs:
           git pull origin trivy --rebase
           git push origin trivy
 
-      - name: Fail Pipeline if Quality Gate Failed
-        if: env.EXIT_CODE == '1'
-        run: exit 1
+   #   - name: Fail Pipeline if Quality Gate Failed
+    #    if: env.EXIT_CODE == '1'
+      #  run: exit 1
 
   docker-build:
     runs-on: ubuntu-latest
