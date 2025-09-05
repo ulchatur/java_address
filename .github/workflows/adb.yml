@@ -1,9 +1,6 @@
 name: Deploy test_db branch to Databricks Shared Folder
 
 on:
-  # push:
-  #   branches:
-  #     - test_db
   workflow_dispatch:
 
 jobs:
@@ -25,15 +22,9 @@ jobs:
         run: |
           pip install databricks-cli
 
-      - name: Configure Databricks CLI
-        run: |
-          mkdir -p ~/.databricks
-          cat <<EOF > ~/.databricks/config
-          [DEFAULT]
-          host = ${{ secrets.DATABRICKS_HOST }}
-          token = ${{ secrets.DATABRICKS_TOKEN }}
-          EOF
-
       - name: Upload to Databricks Shared Folder
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
         run: |
           databricks workspace import_dir . /Shared/test_db --overwrite
