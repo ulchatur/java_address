@@ -1,0 +1,44 @@
+pipeline:
+  name: testpipeline
+  identifier: testpipeline
+  projectIdentifier: KSHarness
+  orgIdentifier: default
+  tags: {}
+  properties:
+    ci:
+      codebase:
+        connectorRef: githubconnector
+        repoName: java_address
+        build: <+input>
+  stages:
+    - stage:
+        name: newbuild
+        identifier: newbuild
+        description: ""
+        type: CI
+        spec:
+          cloneCodebase: true
+          caching:
+            enabled: true
+            override: true
+          buildIntelligence:
+            enabled: true
+          platform:
+            os: Linux
+            arch: Amd64
+          runtime:
+            type: Docker
+            spec: {}
+          execution:
+            steps:
+              - step:
+                  type: BuildAndPushECR
+                  name: BuildAndPushECR_1
+                  identifier: BuildAndPushECR_1
+                  spec:
+                    connectorRef: UllasAWS
+                    region: ap-south-1
+                    account: "194313865111"
+                    imageName: test
+                    tags:
+                      - latest
