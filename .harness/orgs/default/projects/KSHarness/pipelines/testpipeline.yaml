@@ -36,11 +36,9 @@ pipeline:
                     imageName: test
                     tags:
                       - latest
-          infrastructure:
-            type: VM
-            spec:
-              type: Pool
-              spec:
-                poolName: test
-                harnessImageConnectorRef: account.harnessImage
-                os: Linux
+          platform:
+            os: Windows
+            arch: Arm64
+          runtime:
+            type: Docker
+            spec: {}
