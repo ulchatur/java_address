@@ -23,12 +23,6 @@ pipeline:
             override: true
           buildIntelligence:
             enabled: true
-          platform:
-            os: Linux
-            arch: Amd64
-          runtime:
-            type: Docker
-            spec: {}
           execution:
             steps:
               - step:
@@ -42,3 +36,11 @@ pipeline:
                     imageName: test
                     tags:
                       - latest
+          infrastructure:
+            type: VM
+            spec:
+              type: Pool
+              spec:
+                poolName: test
+                harnessImageConnectorRef: account.harnessImage
+                os: Linux
