@@ -37,8 +37,8 @@ pipeline:
                     tags:
                       - latest
           platform:
-            os: Windows
-            arch: Arm64
+            os: Linux
+            arch: Amd64
           runtime:
-            type: Docker
+            type: Cloud
             spec: {}
